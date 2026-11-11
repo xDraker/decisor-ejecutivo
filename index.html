@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111214">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Decisor">
+<meta name="theme-color" content="#111214">
+<title>Decisor Ejecutivo</title>
+<style>
+:root{color-scheme:dark;--metal:#a7a39a;--ink:#08090b;--white:#f2f2f0;--red:#ff174f}
+*{box-sizing:border-box}
+body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14px;background:radial-gradient(ellipse at 50% 15%,#45484a 0,#202326 38%,#101113 78%);font-family:Arial,Helvetica,sans-serif;color:var(--white)}
+.app{width:min(100%,430px);perspective:1000px}
+.device{position:relative;padding:10px 12px 0;border-radius:8px 8px 5px 5px;background:linear-gradient(90deg,#77736b,#d1ccc1 8%,#77736b 14%,#161719 15%,#08090b 85%,#77736b 86%,#d1ccc1 92%,#77736b);box-shadow:0 26px 48px #000a,0 5px 0 #08090b;transform:rotateX(2deg)}
+.panel{background:linear-gradient(145deg,#151719,#08090b 65%,#17191b);border:1px solid #35383b;border-radius:4px 4px 2px 2px;padding:18px 16px 20px;box-shadow:inset 0 1px 0 #ffffff12}
+.brand{text-align:center;letter-spacing:2px;font-size:clamp(25px,7vw,34px);font-weight:800;line-height:1}
+.subtitle{font-size:clamp(15px,4vw,19px);letter-spacing:1px;font-weight:600;text-align:center;margin:3px 0 20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.choice{height:76px;border:2px solid #bfc0c2;border-radius:20px;background:linear-gradient(#17191b,#0b0c0e);display:flex;align-items:center;justify-content:center;text-align:center;padding:5px;color:#f1f1f1;font-weight:800;font-size:clamp(13px,3.6vw,16px);letter-spacing:.2px;box-shadow:inset 0 1px 3px #ffffff0b,0 2px 2px #000;transition:border-color .08s,background .08s,box-shadow .08s,transform .08s}
+.choice.active{border-color:#ff315f;background:linear-gradient(#3c1722,#171014);box-shadow:0 0 7px #ff174f,0 0 22px #ff174f66,inset 0 0 14px #ff174f35;transform:scale(1.025)}
+.choice.winner{border-color:#ff315f;background:linear-gradient(#501827,#211016);box-shadow:0 0 10px #ff174f,0 0 28px #ff174f88,inset 0 0 18px #ff174f55}
+.controls{display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:10px}
+.power-wrap{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:bold;letter-spacing:.5px}
+.power{width:52px;height:37px;border:1px solid #08090b;border-radius:20px;background:linear-gradient(#292c2f,#08090b);padding:4px;display:flex;align-items:center;cursor:pointer;box-shadow:inset 0 2px 4px #000,0 1px 1px #aaa}
+.power-knob{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#777,#222 70%);border:1px solid #050505;box-shadow:0 1px 2px #000,inset 0 1px 2px #ffffff66;transition:transform .2s}
+.power.off .power-knob{transform:translateX(14px)}
+.logo{font-weight:900;font-size:clamp(17px,4.7vw,22px);letter-spacing:-1.2px;color:#d7d8d9;text-shadow:1px 2px 1px #555,0 2px 2px #000;white-space:nowrap}
+.ask{width:49px;height:49px;border-radius:50%;border:2px solid #050505;background:radial-gradient(circle at 35% 25%,#5a5d60,#17191b 60%,#050607);color:#eee;font-weight:900;font-size:11px;letter-spacing:.5px;box-shadow:0 2px 2px #aaa,inset 0 2px 3px #ffffff33;cursor:pointer}
+.ask:active{transform:translateY(2px)}
+.ask:disabled,.power:disabled{opacity:.5;cursor:not-allowed}
+.ledline{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:15px;min-height:20px;color:#a9aaad;font-size:11px;letter-spacing:1.2px;text-transform:uppercase}
+.led{width:10px;height:10px;border-radius:50%;background:#360b16;box-shadow:inset 0 0 3px #000}
+.led.on{background:#ff174f;box-shadow:0 0 6px #ff174f,0 0 15px #ff174f}
+.base{height:62px;margin:0 3px;background:linear-gradient(90deg,#111214,#292b2d 15%,#101113 50%,#292b2d 85%,#111214);border-radius:0 0 8px 8px;box-shadow:0 8px 12px #0008;transform:skewY(.5deg)}
+.status{min-height:44px;text-align:center;margin:20px auto 0;color:#ddd;font-size:14px;line-height:1.4}
+.status strong{color:#fff;letter-spacing:.5px}
+.hint{text-align:center;color:#a8aaad;font-size:12px;margin-top:8px;line-height:1.5}
+@media(prefers-reduced-motion:reduce){.choice,.power-knob{transition:none}}
+</style>
+</head>
+<body>
+<main class="app">
+  <section class="device" aria-label="Decisor Ejecutivo">
+    <div class="panel">
+      <div class="brand">DECISOR</div>
+      <div class="subtitle">EJECUTIVO</div>
+      <div class="grid" id="grid" aria-live="polite">
+        <div class="choice">DEFINITIVAMENTE</div>
+        <div class="choice">PREGUNTA OTRA VEZ</div>
+        <div class="choice">NUNCA</div>
+        <div class="choice">OLVÍDALO</div>
+        <div class="choice">¿POR QUÉ NO?</div>
+        <div class="choice">POSIBLEMENTE</div>
+      </div>
+      <div class="controls">
+        <div class="power-wrap">
+          <span>ON</span>
+          <button class="power" id="power" aria-label="Encender o apagar"><span class="power-knob"></span></button>
+          <span>OFF</span>
+        </div>
+        <div class="logo">Radio Shack</div>
+        <button class="ask" id="ask" aria-label="Consultar">ASK</button>
+      </div>
+      <div class="ledline"><span class="led" id="led"></span><span id="ledtext">LISTO PARA CONSULTAR</span></div>
+    </div>
+  </section>
+  <div class="base"></div>
+  <div class="status" id="status">Piensa en tu pregunta y presiona <strong>ASK</strong>.</div>
+  <div class="hint">La luz recorre las seis respuestas, reduce la velocidad y se detiene al azar en una decisión.</div>
+</main>
+<script>
+(() => {
+  const choices = [...document.querySelectorAll('.choice')];
+  const ask = document.getElementById('ask');
+  const power = document.getElementById('power');
+  const led = document.getElementById('led');
+  const ledtext = document.getElementById('ledtext');
+  const status = document.getElementById('status');
+  const labels = ['DEFINITIVAMENTE','PREGUNTA OTRA VEZ','NUNCA','OLVÍDALO','¿POR QUÉ NO?','POSIBLEMENTE'];
+  let on = true, busy = false, current = -1, runId = 0;
+  function clearChoices(){choices.forEach(c=>c.classList.remove('active','winner'))}
+  function setPower(value){
+    on=value; power.classList.toggle('off',!on); power.setAttribute('aria-pressed',String(on));
+    ask.disabled=!on; power.disabled=busy;
+    if(!on){runId++;busy=false;clearChoices();led.classList.remove('on');ledtext.textContent='APAGADO';status.textContent='Dispositivo apagado.'}
+    else {ledtext.textContent='LISTO PARA CONSULTAR';status.innerHTML='Piensa en tu pregunta y presiona <strong>ASK</strong>.'}
+  }
+  const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
+  async function consult(){
+    if(!on||busy)return;
+    busy=true; ask.disabled=true; power.disabled=true; clearChoices();
+    status.textContent='Consultando…';led.classList.add('on');ledtext.textContent='BUSCANDO RESPUESTA';
+    const thisRun=++runId;
+    const winner=Math.floor(Math.random()*choices.length);
+    const totalSteps=22+Math.floor(Math.random()*9);
+    let index=current<0?Math.floor(Math.random()*6):current;
+    for(let step=0;step<totalSteps;step++){
+      if(thisRun!==runId||!on)return;
+      clearChoices();
+      index=(index+1+ (step%9===8?1:0))%choices.length;
+      choices[index].classList.add('active');
+      const progress=step/(totalSteps-1);
+      const delay=75+Math.pow(progress,2.4)*330;
+      await wait(delay);
+    }
+    if(thisRun!==runId||!on)return;
+    clearChoices();choices[winner].classList.add('winner');current=winner;
+    led.classList.remove('on');void led.offsetWidth;led.classList.add('on');
+    ledtext.textContent='DECISIÓN SELECCIONADA';
+    status.innerHTML='La respuesta es: <strong>'+labels[winner]+'</strong>';
+    busy=false;ask.disabled=false;power.disabled=false;
+  }
+  ask.addEventListener('click',consult);
+  power.addEventListener('click',()=>setPower(!on));
+  setPower(true);
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js").catch(err => console.warn("SW:", err));
+  });
+}
+</script>
+</body>
+</html>
