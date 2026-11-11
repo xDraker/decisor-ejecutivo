@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Decisor Ejecutivo",
+  "short_name": "Decisor",
+  "description": "Decisor aleatorio inspirado en el clásico RadioShack Executive Decision Maker.",
+  "lang": "es-CL",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111214",
+  "theme_color": "#111214",
+  "icons": [
+    {"src":"icons/icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}
+  ]
+}
