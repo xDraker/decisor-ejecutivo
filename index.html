@@ -33,6 +33,7 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
 .ask{width:49px;height:49px;border-radius:50%;border:2px solid #050505;background:radial-gradient(circle at 35% 25%,#5a5d60,#17191b 60%,#050607);color:#eee;font-weight:900;font-size:11px;letter-spacing:.5px;box-shadow:0 2px 2px #aaa,inset 0 2px 3px #ffffff33;cursor:pointer}
 .ask:active{transform:translateY(2px)}
 .ask:disabled,.power:disabled{opacity:.5;cursor:not-allowed}
+.randomizer{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;color:#a9aaad;font-size:11px;font-weight:800;letter-spacing:1.2px}.randomizer select{max-width:205px;padding:8px 28px 8px 10px;border:1px solid #55595d;border-radius:5px;background:#111315;color:#eee;font-size:11px;font-weight:700;letter-spacing:.6px}.randomizer select:focus-visible{outline:2px solid #ff315f;outline-offset:2px}
 .ledline{display:flex;align-items:center;justify-content:center;gap:9px;margin-top:15px;min-height:20px;color:#a9aaad;font-size:11px;letter-spacing:1.2px;text-transform:uppercase}
 .led{width:10px;height:10px;border-radius:50%;background:#360b16;box-shadow:inset 0 0 3px #000}
 .led.on{background:#ff174f;box-shadow:0 0 6px #ff174f,0 0 15px #ff174f}
@@ -66,12 +67,20 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
         <div class="logo">Radio Shack</div>
         <button class="ask" id="ask" aria-label="Consultar">ASK</button>
       </div>
+      <div class="randomizer">
+        <label for="randomMode">AZAR</label>
+        <select id="randomMode" aria-label="Método de azar">
+          <option value="auto">AUTOMÁTICO</option>
+          <option value="math">CONVENCIONAL</option>
+          <option value="crypto">CRIPTOGRÁFICO</option>
+        </select>
+      </div>
       <div class="ledline"><span class="led" id="led"></span><span id="ledtext">LISTO PARA CONSULTAR</span></div>
     </div>
   </section>
   <div class="base"></div>
   <div class="status" id="status">Piensa en tu pregunta y presiona <strong>ASK</strong>.</div>
-  <div class="hint">La luz recorre las seis respuestas, reduce la velocidad y se detiene al azar en una decisión.</div>
+  <div class="hint">La luz recorre las seis respuestas y se detiene al azar. El método se elige en AZAR.</div>
 </main>
 <script>
 (() => {
@@ -81,9 +90,32 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
   const led = document.getElementById('led');
   const ledtext = document.getElementById('ledtext');
   const status = document.getElementById('status');
+  const randomMode = document.getElementById('randomMode');
   const labels = ['DEFINITIVAMENTE','PREGUNTA OTRA VEZ','NUNCA','OLVÍDALO','¿POR QUÉ NO?','POSIBLEMENTE'];
   let on = true, busy = false, current = -1, runId = 0;
   function clearChoices(){choices.forEach(c=>c.classList.remove('active','winner'))}
+  function conventionalIndex(){return Math.floor(Math.random()*choices.length)}
+  function cryptographicIndex(){
+    if(!globalThis.crypto?.getRandomValues) return conventionalIndex();
+    const range = 0x100000000;
+    const limit = Math.floor(range / choices.length) * choices.length;
+    const buffer = new Uint32Array(1);
+    let value;
+    do { crypto.getRandomValues(buffer); value = buffer[0]; } while(value >= limit);
+    return value % choices.length;
+  }
+  function randomIndex(){
+    const mode = randomMode.value;
+    if(mode === 'math') return conventionalIndex();
+    if(mode === 'crypto') return cryptographicIndex();
+    return globalThis.crypto?.getRandomValues ? cryptographicIndex() : conventionalIndex();
+  }
+  function randomMethodLabel(){
+    const mode = randomMode.value;
+    if(mode === 'math') return 'CONVENCIONAL';
+    if(mode === 'crypto') return globalThis.crypto?.getRandomValues ? 'CRIPTOGRÁFICO' : 'CONVENCIONAL (RESPALDO)';
+    return globalThis.crypto?.getRandomValues ? 'CRIPTOGRÁFICO AUTOMÁTICO' : 'CONVENCIONAL (RESPALDO)';
+  }
   function setPower(value){
     on=value; power.classList.toggle('off',!on); power.setAttribute('aria-pressed',String(on));
     ask.disabled=!on; power.disabled=busy;
@@ -94,9 +126,9 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
   async function consult(){
     if(!on||busy)return;
     busy=true; ask.disabled=true; power.disabled=true; clearChoices();
-    status.textContent='Consultando…';led.classList.add('on');ledtext.textContent='BUSCANDO RESPUESTA';
+    status.textContent='Consultando…';led.classList.add('on');ledtext.textContent='BUSCANDO RESPUESTA · '+randomMethodLabel();
     const thisRun=++runId;
-    const winner=Math.floor(Math.random()*choices.length);
+    const winner=randomIndex();
     const totalSteps=22+Math.floor(Math.random()*9);
     let index=current<0?Math.floor(Math.random()*6):current;
     for(let step=0;step<totalSteps;step++){
