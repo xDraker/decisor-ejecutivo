@@ -128,7 +128,6 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
     busy=true; ask.disabled=true; power.disabled=true; clearChoices();
     status.textContent='Consultando…';led.classList.add('on');ledtext.textContent='BUSCANDO RESPUESTA · '+randomMethodLabel();
     const thisRun=++runId;
-    const winner=randomIndex();
     const totalSteps=22+Math.floor(Math.random()*9);
     let index=current<0?Math.floor(Math.random()*6):current;
     for(let step=0;step<totalSteps;step++){
@@ -141,6 +140,7 @@ body{margin:0;min-height:100svh;display:grid;place-items:center;padding:24px 14p
       await wait(delay);
     }
     if(thisRun!==runId||!on)return;
+    const winner=randomIndex();
     clearChoices();choices[winner].classList.add('winner');current=winner;
     led.classList.remove('on');void led.offsetWidth;led.classList.add('on');
     ledtext.textContent='DECISIÓN SELECCIONADA';
